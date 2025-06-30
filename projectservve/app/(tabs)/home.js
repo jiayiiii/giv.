@@ -3,7 +3,6 @@ import { SafeAreaView, ScrollView, StyleSheet, Text, View, ActivityIndicator } f
 
 export default function Index() {
   const [opportunities, setOpportunities] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('https://api.sheetbest.com/sheets/9ccf6dab-2ca4-4225-913d-aee1735da00a')
