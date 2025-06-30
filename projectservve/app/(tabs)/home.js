@@ -1,48 +1,51 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-
-const opportunities = [
-  {
-    email: "contact@beachcleanup.org",
-    name: "Beach Cleanup!!!",
-    date: "2025-06-15",
-    time: "10:00",
-    duration: { hours: 2, minutes: 0 },
-    description: "Help clean up the a very dirty beach :( .",
-    limit: 20,
-    parentApproval: true,
-    Filters: ["Upper Secondary", "Teachers"],
-    category: "Environment",
-  },
-  {
-    email: "tom_tan@gmail.com",
-    name: "Relay 4 Life",
-    date: "2025-06-18",
-    time: "14:00",
-    duration: { hours: 1, minutes: 30 },
-    description: "Assist with sorting and distributing food.",
-    limit: 10,
-    parentApproval: false,
-    Filters: ["Everyone"],
-    category: "Community",
-  },
-]
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 
 export default function Index() {
+  const [opportunities, setOpportunities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('https://api.sheetbest.com/sheets/9ccf6dab-2ca4-4225-913d-aee1735da00a')
+      .then(response => response.json())
+      .then(data => {
+        // Optional: filter out blank rows
+        const cleanData = data.filter(item => item["Name of your volunteering opportunity"]);
+        setOpportunities(cleanData);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.header}>Hi, user!</Text>
         <Text style={styles.subheader}>Volunteering Opportunities</Text>
-          {opportunities.map((opportunity, idx) => (
+
+        {loading ? (
+          <ActivityIndicator size="large" color="#888" />
+        ) : (
+          opportunities.map((item, idx) => (
             <View key={idx} style={styles.card}>
-              <Text style={styles.name}>{opportunity.name}</Text>
-              <Text style={styles.info}>Date: {opportunity.date}</Text>
-              <Text style={styles.info}>Time: {opportunity.time}</Text>
-              <Text style={styles.info}>Duration: {opportunity.duration.hours} hour{opportunity.duration.hours !== 1 ? "s" : ""} {opportunity.duration.minutes} minutes</Text>
-        </View>
-            ))}
-            </ScrollView>
-            </SafeAreaView>
+              <Text style={styles.name}>{item["Name of your volunteering opportunity"]}</Text>
+              <Text style={styles.info}>Date: {item.date}</Text>
+              <Text style={styles.info}>Time: {item.time}</Text>
+              <Text style={styles.info}>Duration: {item.duration_hours} hour(s)</Text>
+              <Text style={styles.info}>Limit: {item["Limit of People (put only integers with no spaces)"]}</Text>
+              <Text style={styles.info}>Parent Approval: {item["Parents approval required?"]}</Text>
+              <Text style={styles.info}>Filters: {item.Filters}</Text>
+              <Text style={styles.info}>Category: {item.Category}</Text>
+              <Text style={styles.info}>Contact: {item["Email to contact for more details"]}</Text>
+              <Text style={styles.info}>Description: {item.Description}</Text>
+            </View>
+          ))
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
