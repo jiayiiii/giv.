@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function DetailsScreen({ route }) {
+export default function Details({ route }) {
   const { opportunity } = route.params;
 
   return (
