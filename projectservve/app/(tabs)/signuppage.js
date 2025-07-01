@@ -10,10 +10,10 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // 👈 ADD THIS
+import { useNavigation } from '@react-navigation/native';
 
 export default function SignUpScreen() {
-  const navigation = useNavigation(); // 👈 INIT NAVIGATION
+  const navigation = useNavigation();
 
   const [form, setForm] = useState({
     name: '',
@@ -21,7 +21,6 @@ export default function SignUpScreen() {
     role: '',
     class: '',
     contact: '',
-    otherInfo: '',
   });
 
   const handleChange = (field, value) => {
@@ -45,10 +44,10 @@ export default function SignUpScreen() {
 
       if (res.ok) {
         Alert.alert('Success', 'You have signed up successfully!');
-        setForm({ name: '', email: '', role: '', class: '', contact: '', otherInfo: '' });
+        setForm({ name: '', email: '', role: '', class: '', contact: ''});
 
         // Navigate to HomeScreen
-        navigation.navigate('HomeScreen'); // 👈 MATCH this to the screen name in Tabs
+        navigation.navigate('home');
       } else {
         Alert.alert('Error', 'Failed to submit. Please try again.');
       }
@@ -81,7 +80,7 @@ export default function SignUpScreen() {
         />
         <TextInput
           style={styles.input}
-          placeholder="Role (e.g. Student Council)"
+          placeholder="Role (e.g. Student/student council etc.)"
           value={form.role}
           onChangeText={text => handleChange('role', text)}
         />
@@ -97,13 +96,6 @@ export default function SignUpScreen() {
           keyboardType="phone-pad"
           value={form.contact}
           onChangeText={text => handleChange('contact', text)}
-        />
-        <TextInput
-          style={[styles.input, { height: 80 }]}
-          placeholder="Other Info (optional)"
-          multiline
-          value={form.otherInfo}
-          onChangeText={text => handleChange('otherInfo', text)}
         />
 
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
