@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import {View,Text,TextInput,TouchableOpacity,StyleSheet,Alert,KeyboardAvoidingView,Platform} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function LoginScreen({ setUser }) {
@@ -19,7 +10,7 @@ export default function LoginScreen({ setUser }) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Missing Info', 'Please enter both email and password.');
+      Alert.alert('Missing Info', 'Please enter email and password.');
       return;
     }
 
@@ -34,7 +25,7 @@ export default function LoginScreen({ setUser }) {
 
       if (matchedUser) {
         Alert.alert('Welcome!', `Logged in as ${matchedUser.name}`);
-        setUser(matchedUser); // Store user info globally
+        setUser(matchedUser); 
         navigation.navigate('home');
       } else {
         Alert.alert('Invalid Credentials', 'Email or password is incorrect.');

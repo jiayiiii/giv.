@@ -161,7 +161,6 @@ export default function HomeScreen({ navigation }) {
     </Text>
   </TouchableOpacity>
 
-  {/* Show clear button if date is selected */}
   {selectedDate && (
     <TouchableOpacity onPress={() => setSelectedDate(null)} style={styles.clearDateButton}>
       <Text style={styles.clearDateText}>Clear Date</Text>
