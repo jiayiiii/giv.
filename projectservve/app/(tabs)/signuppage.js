@@ -18,6 +18,7 @@ export default function SignUpScreen() {
   const [form, setForm] = useState({
     name: '',
     email: '',
+    password: '',
     role: '',
     class: '',
     contact: '',
@@ -30,8 +31,8 @@ export default function SignUpScreen() {
   const handleSubmit = async () => {
     const url = 'https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c';
 
-    if (!form.name || !form.email) {
-      Alert.alert('Missing Info', 'Name and Email are required.');
+    if (!form.name || !form.email || !form.password) {
+      Alert.alert('Missing Info', 'Name, Email, and Password are required.');
       return;
     }
 
@@ -44,9 +45,7 @@ export default function SignUpScreen() {
 
       if (res.ok) {
         Alert.alert('Success', 'You have signed up successfully!');
-        setForm({ name: '', email: '', role: '', class: '', contact: ''});
-
-        // Navigate to HomeScreen
+        setForm({ name: '', email: '', password: '', role: '', class: '', contact: '' });
         navigation.navigate('home');
       } else {
         Alert.alert('Error', 'Failed to submit. Please try again.');
@@ -71,6 +70,7 @@ export default function SignUpScreen() {
           value={form.name}
           onChangeText={text => handleChange('name', text)}
         />
+
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -78,18 +78,29 @@ export default function SignUpScreen() {
           value={form.email}
           onChangeText={text => handleChange('email', text)}
         />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          value={form.password}
+          onChangeText={text => handleChange('password', text)}
+        />
+
         <TextInput
           style={styles.input}
           placeholder="Role (e.g. Student/student council etc.)"
           value={form.role}
           onChangeText={text => handleChange('role', text)}
         />
+
         <TextInput
           style={styles.input}
           placeholder="Class"
           value={form.class}
           onChangeText={text => handleChange('class', text)}
         />
+
         <TextInput
           style={styles.input}
           placeholder="Contact Number"
