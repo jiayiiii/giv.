@@ -36,7 +36,7 @@ export default function HomeScreen({ navigation }) {
 
   const [selectedBoardFilter, setSelectedBoardFilter] = useState(null);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDates, setSelectedDates] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -59,8 +59,13 @@ export default function HomeScreen({ navigation }) {
   };
 
   const onDateChange = (event, date) => {
-    if (event.type !== 'dismissed') {
-      setSelectedDate(date);
+    if (event.type !== 'dismissed' && date) {
+      setSelectedDates((prevDates) => {
+        const exists = prevDates.some(d => d.toDateString() === date.toDateString());
+        return exists
+          ? prevDates.filter(d => d.toDateString() !== date.toDateString())
+          : [...prevDates, date];
+      });
     }
     setShowDatePicker(false);
   };
@@ -88,13 +93,13 @@ export default function HomeScreen({ navigation }) {
       );
     }
 
-    if (selectedDate) {
-      const filterDateStr = formatDate(selectedDate);
-      filtered = filtered.filter(op => op.date === filterDateStr);
+    if (selectedDates.length > 0) {
+      const selectedStrings = selectedDates.map(formatDate);
+      filtered = filtered.filter(op => selectedStrings.includes(op.date));
     }
 
     setFilteredData(filtered);
-  }, [selectedBoardFilter, selectedCategoryFilter, selectedDate, opportunities]);
+  }, [selectedBoardFilter, selectedCategoryFilter, selectedDates, opportunities]);
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -106,9 +111,7 @@ export default function HomeScreen({ navigation }) {
           onPress={() => setShowFilters(!showFilters)}
           activeOpacity={0.7}
         >
-          <Text style={styles.filterText}>
-            Filters
-          </Text>
+          <Text style={styles.filterText}>Filters</Text>
         </TouchableOpacity>
       </View>
 
@@ -119,20 +122,10 @@ export default function HomeScreen({ navigation }) {
             {boardFilters.map(filter => (
               <TouchableOpacity
                 key={filter}
-                style={[
-                  styles.filterButton,
-                  selectedBoardFilter === filter && styles.filterButtonSelected,
-                ]}
-                onPress={() =>
-                  setSelectedBoardFilter(selectedBoardFilter === filter ? null : filter)
-                }
+                style={[styles.filterButton, selectedBoardFilter === filter && styles.filterButtonSelected]}
+                onPress={() => setSelectedBoardFilter(selectedBoardFilter === filter ? null : filter)}
               >
-                <Text
-                  style={[
-                    styles.filterText,
-                    selectedBoardFilter === filter && styles.filterTextSelected,
-                  ]}
-                >
+                <Text style={[styles.filterText, selectedBoardFilter === filter && styles.filterTextSelected]}>
                   {filter}
                 </Text>
               </TouchableOpacity>
@@ -144,47 +137,36 @@ export default function HomeScreen({ navigation }) {
             {categoryFilters.map(filter => (
               <TouchableOpacity
                 key={filter}
-                style={[
-                  styles.filterButton,
-                  selectedCategoryFilter === filter && styles.filterButtonSelected,
-                ]}
-                onPress={() =>
-                  setSelectedCategoryFilter(selectedCategoryFilter === filter ? null : filter)
-                }
+                style={[styles.filterButton, selectedCategoryFilter === filter && styles.filterButtonSelected]}
+                onPress={() => setSelectedCategoryFilter(selectedCategoryFilter === filter ? null : filter)}
               >
-                <Text
-                  style={[
-                    styles.filterText,
-                    selectedCategoryFilter === filter && styles.filterTextSelected,
-                  ]}
-                >
+                <Text style={[styles.filterText, selectedCategoryFilter === filter && styles.filterTextSelected]}>
                   {filter}
                 </Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
 
-          <View style={styles.datePickerBack}>
+          <View style={styles.datePickerBox}>
             <Text style={styles.sectionLabel}>Filter by Date</Text>
 
-            <TouchableOpacity
-              onPress={() => setShowDatePicker(true)}
-              style={styles.datePickerButton}
-            >
-              <Text style={{ fontSize: 16, color: selectedDate ? '#333' : '#aaa' }}>
-                {selectedDate ? formatDate(selectedDate) : 'Select a date'}
+            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.datePickerButton}>
+              <Text style={{ fontSize: 16, color: selectedDates.length > 0 ? '#333' : '#aaa' }}>
+                {selectedDates.length > 0
+                  ? selectedDates.map(formatDate).join(', ')
+                  : 'Select date(s)'}
               </Text>
             </TouchableOpacity>
 
-            {selectedDate && (
-              <TouchableOpacity onPress={() => setSelectedDate(null)} style={styles.clearDateButton}>
-                <Text style={styles.clearDateText}>Clear Date</Text>
+            {selectedDates.length > 0 && (
+              <TouchableOpacity onPress={() => setSelectedDates([])} style={styles.clearDateButton}>
+                <Text style={styles.clearDateText}>Clear Dates</Text>
               </TouchableOpacity>
             )}
 
             {showDatePicker && (
               <DateTimePicker
-                value={selectedDate || new Date()}
+                value={new Date()}
                 mode="date"
                 display={Platform.OS === 'android' ? 'calendar' : 'inline'}
                 onChange={onDateChange}
@@ -193,7 +175,6 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
       )}
-
 
       <View style={styles.list}>
         {filteredData.length === 0 ? (
@@ -236,20 +217,22 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   filterButton: {
-    backgroundColor: '#847ed6',
-    paddingTop: 12,
-    paddingHorizontal: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    backgroundColor: '#e0e0f7',
     borderRadius: 25,
-    alignItems: 'center',
-    shadowColor: '#847ed6',
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
+    marginRight: 12,
+  },
+  filterButtonSelected: {
+    backgroundColor: '#847ed6',
   },
   filterText: {
+    fontSize: 14,
+    color: '#555',
+  },
+  filterTextSelected: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   filters: {
     paddingVertical: 15,
@@ -267,24 +250,6 @@ const styles = StyleSheet.create({
   horizontalScroll: {
     paddingLeft: 20,
     marginBottom: 15,
-  },
-  filterButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    backgroundColor: '#e0e0f7',
-    borderRadius: 25,
-    marginRight: 12,
-  },
-  filterButtonSelected: {
-    backgroundColor: '#847ed6',
-  },
-  filterText: {
-    fontSize: 14,
-    color: '#555',
-  },
-  filterTextSelected: {
-    color: '#fff',
-    fontWeight: '700',
   },
   datePickerBox: {
     marginHorizontal: 20,
