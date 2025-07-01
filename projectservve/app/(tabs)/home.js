@@ -252,14 +252,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   filters: {
-    backgroundColor: '#f8f8f8',
     paddingVertical: 15,
     marginHorizontal: 20,
     marginTop: 0,
     marginBottom: 15,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
   },
   sectionLabel: {
     fontSize: 16,
@@ -278,10 +274,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e0f7',
     borderRadius: 25,
     marginRight: 12,
-    shadowColor: '#847ed6',
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
   },
   filterButtonSelected: {
     backgroundColor: '#847ed6',
