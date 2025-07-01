@@ -150,24 +150,34 @@ export default function HomeScreen({ navigation }) {
       </ScrollView>
 
       <View style={styles.datePickerContainer}>
-        <Text style={styles.label}>Filter by Date</Text>
-        <TouchableOpacity
-          onPress={() => setShowDatePicker(true)}
-          style={styles.datePickerButton}
-        >
-          <Text style={{ fontSize: 16, color: selectedDate ? '#333' : '#aaa' }}>
-            {selectedDate ? formatDate(selectedDate) : 'Select a date'}
-          </Text>
-        </TouchableOpacity>
-        {showDatePicker && (
-          <DateTimePicker
-            value={selectedDate || new Date()}
-            mode="date"
-            display={Platform.OS === 'android' ? 'calendar' : 'inline'}
-            onChange={onDateChange}
-          />
-        )}
-      </View>
+  <Text style={styles.label}>Filter by Date</Text>
+
+  <TouchableOpacity
+    onPress={() => setShowDatePicker(true)}
+    style={styles.datePickerButton}
+  >
+    <Text style={{ fontSize: 16, color: selectedDate ? '#333' : '#aaa' }}>
+      {selectedDate ? formatDate(selectedDate) : 'Select a date'}
+    </Text>
+  </TouchableOpacity>
+
+  {/* Show clear button if date is selected */}
+  {selectedDate && (
+    <TouchableOpacity onPress={() => setSelectedDate(null)} style={styles.clearDateButton}>
+      <Text style={styles.clearDateText}>Clear Date</Text>
+    </TouchableOpacity>
+  )}
+
+  {showDatePicker && (
+    <DateTimePicker
+      value={selectedDate || new Date()}
+      mode="date"
+      display={Platform.OS === 'android' ? 'calendar' : 'inline'}
+      onChange={onDateChange}
+    />
+  )}
+</View>
+
 
       <View style={styles.listContainer}>
         {filteredData.length === 0 ? (
