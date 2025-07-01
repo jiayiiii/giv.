@@ -7,7 +7,6 @@ import {
   View,
   Platform,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function HomeScreen({ navigation }) {
@@ -22,7 +21,6 @@ export default function HomeScreen({ navigation }) {
     'Upper Secondary',
     'Lower Secondary',
     'Teachers',
-    'Everyone',
     'Others',
   ];
 
@@ -34,13 +32,10 @@ export default function HomeScreen({ navigation }) {
     'Healthcare',
     'Environmental',
     'Community Service',
-    'All',
   ];
 
-  const [selectedBoardFilter, setSelectedBoardFilter] = useState('Everyone');
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All');
-  const [parentApprovalFilter, setParentApprovalFilter] = useState('Yes');
-
+  const [selectedBoardFilter, setSelectedBoardFilter] = useState(null);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -62,36 +57,35 @@ export default function HomeScreen({ navigation }) {
     return `${day}/${month}/${year}`;
   };
 
+  const onDateChange = (event, date) => {
+    if (event.type !== 'dismissed') {
+      setSelectedDate(date);
+    }
+    setShowDatePicker(false);
+  };
+
   useEffect(() => {
     let filtered = opportunities;
 
-    if (selectedBoardFilter !== 'Everyone') {
+    if (selectedBoardFilter) {
       if (selectedBoardFilter === 'Others') {
-        const knownBoards = boardFilters.filter(b => b !== 'Everyone' && b !== 'Others');
+        const knownBoards = boardFilters.filter(b => b !== 'Others');
         filtered = filtered.filter(op => {
-          const filterVal = (op.Filters || op.Category || '').toLowerCase();
-          return !knownBoards.some(b => filterVal.includes(b.toLowerCase()));
+          const val = (op.Filters || '').toLowerCase();
+          return !knownBoards.some(b => val.includes(b.toLowerCase()));
         });
       } else {
-        filtered = filtered.filter(op => {
-          const filterVal = (op.Filters || op.Category || '').toLowerCase();
-          return filterVal.includes(selectedBoardFilter.toLowerCase());
-        });
+        filtered = filtered.filter(op =>
+          (op.Filters || '').toLowerCase().includes(selectedBoardFilter.toLowerCase())
+        );
       }
     }
 
-    if (selectedCategoryFilter !== 'All') {
-      filtered = filtered.filter(op => {
-        const catVal = (op.Category || '').toLowerCase();
-        return catVal.includes(selectedCategoryFilter.toLowerCase());
-      });
+    if (selectedCategoryFilter) {
+      filtered = filtered.filter(op =>
+        (op.Category || '').toLowerCase().includes(selectedCategoryFilter.toLowerCase())
+      );
     }
-
-    // Strict filter for parents approval yes/no
-    filtered = filtered.filter(op => {
-      const approval = (op["Parents approval required?"] || '').toLowerCase();
-      return approval === parentApprovalFilter.toLowerCase();
-    });
 
     if (selectedDate) {
       const filterDateStr = formatDate(selectedDate);
@@ -99,15 +93,7 @@ export default function HomeScreen({ navigation }) {
     }
 
     setFilteredData(filtered);
-  }, [selectedBoardFilter, selectedCategoryFilter, parentApprovalFilter, selectedDate, opportunities]);
-
-  // Fix for Android dismissal behavior
-  const onDateChange = (event, selected) => {
-    if (event.type === 'set') {
-      setSelectedDate(selected);
-    }
-    setShowDatePicker(Platform.OS === 'ios');
-  };
+  }, [selectedBoardFilter, selectedCategoryFilter, selectedDate, opportunities]);
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -122,7 +108,9 @@ export default function HomeScreen({ navigation }) {
               styles.filterButton,
               selectedBoardFilter === filter && styles.filterButtonSelected,
             ]}
-            onPress={() => setSelectedBoardFilter(filter)}
+            onPress={() =>
+              setSelectedBoardFilter(selectedBoardFilter === filter ? null : filter)
+            }
           >
             <Text
               style={[
@@ -145,7 +133,9 @@ export default function HomeScreen({ navigation }) {
               styles.filterButton,
               selectedCategoryFilter === filter && styles.filterButtonSelected,
             ]}
-            onPress={() => setSelectedCategoryFilter(filter)}
+            onPress={() =>
+              setSelectedCategoryFilter(selectedCategoryFilter === filter ? null : filter)
+            }
           >
             <Text
               style={[
@@ -158,21 +148,6 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
-      <View style={styles.pickerContainer}>
-        <Text style={styles.label}>Parents Approval Required?</Text>
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={parentApprovalFilter}
-            onValueChange={setParentApprovalFilter}
-            style={styles.picker}
-            dropdownIconColor="#847ed6"
-          >
-            <Picker.Item label="Yes" value="Yes" />
-            <Picker.Item label="No" value="No" />
-          </Picker>
-        </View>
-      </View>
 
       <View style={styles.datePickerContainer}>
         <Text style={styles.label}>Filter by Date</Text>
@@ -188,7 +163,7 @@ export default function HomeScreen({ navigation }) {
           <DateTimePicker
             value={selectedDate || new Date()}
             mode="date"
-            display="calendar"
+            display={Platform.OS === 'android' ? 'calendar' : 'inline'}
             onChange={onDateChange}
           />
         )}
@@ -209,8 +184,7 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.info}>Date: {item.date}</Text>
               <Text style={styles.info}>Time: {item.time}</Text>
               <Text style={styles.info}>Category: {item.Category}</Text>
-              <Text style={styles.info}>Parents Approval: {item["Parents approval required?"]}</Text>
-              <Text style={styles.info}>Board/Filters: {item.Filters || item.Category || 'N/A'}</Text>
+              <Text style={styles.info}>Filters: {item.Filters || item.Category || 'N/A'}</Text>
             </TouchableOpacity>
           ))
         )}
@@ -229,6 +203,7 @@ const styles = StyleSheet.create({
     color: '#3a3a3a',
     marginVertical: 20,
     paddingHorizontal: 20,
+    paddingTop: 50,
   },
   sectionLabel: {
     fontSize: 16,
@@ -262,26 +237,6 @@ const styles = StyleSheet.create({
   filterTextSelected: {
     color: '#fff',
     fontWeight: '700',
-  },
-  pickerContainer: {
-    marginHorizontal: 20,
-    marginBottom: 25,
-  },
-  label: {
-    fontWeight: '600',
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#444',
-  },
-  pickerWrapper: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  picker: {
-    height: 44,
-    width: '100%',
   },
   datePickerContainer: {
     marginHorizontal: 20,
