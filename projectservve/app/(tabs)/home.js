@@ -7,7 +7,6 @@ import {
   View,
   Platform,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function HomeScreen({ navigation }) {
@@ -22,7 +21,6 @@ export default function HomeScreen({ navigation }) {
     'Upper Secondary',
     'Lower Secondary',
     'Teachers',
-    'Everyone',
     'Others',
   ];
 
@@ -34,15 +32,13 @@ export default function HomeScreen({ navigation }) {
     'Healthcare',
     'Environmental',
     'Community Service',
-    'All',
   ];
 
-  const [selectedBoardFilter, setSelectedBoardFilter] = useState('Everyone');
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All');
-  const [parentApprovalFilter, setParentApprovalFilter] = useState('Yes');
-
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedBoardFilter, setSelectedBoardFilter] = useState(null);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState(null);
+  const [selectedDates, setSelectedDates] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     fetch('https://api.sheetbest.com/sheets/9ccf6dab-2ca4-4225-913d-aee1735da00a')
@@ -62,118 +58,125 @@ export default function HomeScreen({ navigation }) {
     return `${day}/${month}/${year}`;
   };
 
+  const onDateChange = (event, date) => {
+    if (event.type !== 'dismissed' && date) {
+      setSelectedDates((prevDates) => {
+        const exists = prevDates.some(d => d.toDateString() === date.toDateString());
+        return exists
+          ? prevDates.filter(d => d.toDateString() !== date.toDateString())
+          : [...prevDates, date];
+      });
+    }
+    setShowDatePicker(false);
+  };
+
   useEffect(() => {
     let filtered = opportunities;
 
-    if (selectedBoardFilter !== 'Everyone') {
+    if (selectedBoardFilter) {
       if (selectedBoardFilter === 'Others') {
-        const knownBoards = boardFilters.filter(b => b !== 'Everyone' && b !== 'Others');
+        const knownBoards = boardFilters.filter(b => b !== 'Others');
         filtered = filtered.filter(op => {
-          const filterVal = (op.Filters || op.Category || '').toLowerCase();
-          return !knownBoards.some(b => filterVal.includes(b.toLowerCase()));
+          const val = (op.Filters || '').toLowerCase();
+          return !knownBoards.some(b => val.includes(b.toLowerCase()));
         });
       } else {
-        filtered = filtered.filter(op => {
-          const filterVal = (op.Filters || op.Category || '').toLowerCase();
-          return filterVal.includes(selectedBoardFilter.toLowerCase());
-        });
+        filtered = filtered.filter(op =>
+          (op.Filters || '').toLowerCase().includes(selectedBoardFilter.toLowerCase())
+        );
       }
     }
 
-    if (selectedCategoryFilter !== 'All') {
-      filtered = filtered.filter(op => {
-        const catVal = (op.Category || '').toLowerCase();
-        return catVal.includes(selectedCategoryFilter.toLowerCase());
-      });
+    if (selectedCategoryFilter) {
+      filtered = filtered.filter(op =>
+        (op.Category || '').toLowerCase().includes(selectedCategoryFilter.toLowerCase())
+      );
     }
 
-    if (selectedDate) {
-      const filterDateStr = formatDate(selectedDate);
-      filtered = filtered.filter(op => op.date === filterDateStr);
+    if (selectedDates.length > 0) {
+      const selectedStrings = selectedDates.map(formatDate);
+      filtered = filtered.filter(op => selectedStrings.includes(op.date));
     }
 
     setFilteredData(filtered);
-  }, [selectedBoardFilter, selectedCategoryFilter, parentApprovalFilter, selectedDate, opportunities]);
-
-  // Fix for Android dismissal behavior
-  const onDateChange = (event, selected) => {
-    if (event.type === 'set') {
-      setSelectedDate(selected);
-    }
-    setShowDatePicker(Platform.OS === 'ios');
-  };
+  }, [selectedBoardFilter, selectedCategoryFilter, selectedDates, opportunities]);
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 40 }}>
       <Text style={styles.title}>Volunteering Opportunities</Text>
 
-      <Text style={styles.sectionLabel}>Filter by Board / Group</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-        {boardFilters.map(filter => (
-          <TouchableOpacity
-            key={filter}
-            style={[
-              styles.filterButton,
-              selectedBoardFilter === filter && styles.filterButtonSelected,
-            ]}
-            onPress={() => setSelectedBoardFilter(selectedBoardFilter === filter ? 'Everyone' : filter)}
-          >
-            <Text
-              style={[
-                styles.filterText,
-                selectedBoardFilter === filter && styles.filterTextSelected,
-              ]}
-            >
-              {filter}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <Text style={styles.sectionLabel}>Filter by Category</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-        {categoryFilters.map(filter => (
-          <TouchableOpacity
-            key={filter}
-            style={[
-              styles.filterButton,
-              selectedCategoryFilter === filter && styles.filterButtonSelected,
-            ]}
-            onPress={() => setSelectedCategoryFilter(selectedCategoryFilter === filter ? 'All' : filter)}
-          >
-            <Text
-              style={[
-                styles.filterText,
-                selectedCategoryFilter === filter && styles.filterTextSelected,
-              ]}
-            >
-              {filter}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <View style={styles.datePickerContainer}>
-        <Text style={styles.label}>Filter by Date</Text>
-        <TouchableOpacity
-          onPress={() => setShowDatePicker(true)}
-          style={styles.datePickerButton}
+      <View style={styles.filterBox}>
+        <TouchableOpacity 
+          style={styles.filterButton}
+          onPress={() => setShowFilters(!showFilters)}
+          activeOpacity={0.7}
         >
-          <Text style={{ fontSize: 16, color: selectedDate ? '#333' : '#aaa' }}>
-            {selectedDate ? formatDate(selectedDate) : 'Select a date'}
-          </Text>
+          <Text style={styles.filterText}>Filters</Text>
         </TouchableOpacity>
-        {showDatePicker && (
-          <DateTimePicker
-            value={selectedDate || new Date()}
-            mode="date"
-            display="calendar"
-            onChange={onDateChange}
-          />
-        )}
       </View>
 
-      <View style={styles.listContainer}>
+      {showFilters && (
+        <View style={styles.filters}>
+          <Text style={styles.sectionLabel}>Filter by Board / Group</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+            {boardFilters.map(filter => (
+              <TouchableOpacity
+                key={filter}
+                style={[styles.filterButton, selectedBoardFilter === filter && styles.filterButtonSelected]}
+                onPress={() => setSelectedBoardFilter(selectedBoardFilter === filter ? null : filter)}
+              >
+                <Text style={[styles.filterText, selectedBoardFilter === filter && styles.filterTextSelected]}>
+                  {filter}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <Text style={styles.sectionLabel}>Filter by Category</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+            {categoryFilters.map(filter => (
+              <TouchableOpacity
+                key={filter}
+                style={[styles.filterButton, selectedCategoryFilter === filter && styles.filterButtonSelected]}
+                onPress={() => setSelectedCategoryFilter(selectedCategoryFilter === filter ? null : filter)}
+              >
+                <Text style={[styles.filterText, selectedCategoryFilter === filter && styles.filterTextSelected]}>
+                  {filter}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <View style={styles.datePickerBox}>
+            <Text style={styles.sectionLabel}>Filter by Date</Text>
+
+            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.datePickerButton}>
+              <Text style={{ fontSize: 16, color: selectedDates.length > 0 ? '#333' : '#aaa' }}>
+                {selectedDates.length > 0
+                  ? selectedDates.map(formatDate).join(', ')
+                  : 'Select date(s)'}
+              </Text>
+            </TouchableOpacity>
+
+            {selectedDates.length > 0 && (
+              <TouchableOpacity onPress={() => setSelectedDates([])} style={styles.clearDateButton}>
+                <Text style={styles.clearDateText}>Clear Dates</Text>
+              </TouchableOpacity>
+            )}
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={new Date()}
+                mode="date"
+                display={Platform.OS === 'android' ? 'calendar' : 'inline'}
+                onChange={onDateChange}
+              />
+            )}
+          </View>
+        </View>
+      )}
+
+      <View style={styles.list}>
         {filteredData.length === 0 ? (
           <Text style={styles.noResults}>No opportunities found.</Text>
         ) : (
@@ -188,7 +191,7 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.info}>Date: {item.date}</Text>
               <Text style={styles.info}>Time: {item.time}</Text>
               <Text style={styles.info}>Category: {item.Category}</Text>
-              <Text style={styles.info}>Board/Filters: {item.Filters || item.Category || 'N/A'}</Text>
+              <Text style={styles.info}>Filters: {item.Filters || item.Category || 'N/A'}</Text>
             </TouchableOpacity>
           ))
         )}
@@ -209,16 +212,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 50,
   },
-  sectionLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#555',
-    marginHorizontal: 20,
-    marginBottom: 10,
-  },
-  horizontalScroll: {
-    paddingLeft: 20,
-    marginBottom: 15,
+  filterBox: {
+    paddingHorizontal: 20,
+    marginBottom: 0,
   },
   filterButton: {
     paddingVertical: 10,
@@ -226,10 +222,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e0f7',
     borderRadius: 25,
     marginRight: 12,
-    shadowColor: '#847ed6',
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
   },
   filterButtonSelected: {
     backgroundColor: '#847ed6',
@@ -242,27 +234,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
   },
-  pickerContainer: {
+  filters: {
+    paddingVertical: 15,
     marginHorizontal: 20,
-    marginBottom: 25,
+    marginTop: 0,
+    marginBottom: 15,
   },
-  label: {
-    fontWeight: '600',
+  sectionLabel: {
     fontSize: 16,
-    marginBottom: 8,
-    color: '#444',
+    fontWeight: '600',
+    color: '#555',
+    marginHorizontal: 20,
+    marginBottom: 10,
   },
-  pickerWrapper: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    overflow: 'hidden',
+  horizontalScroll: {
+    paddingLeft: 20,
+    marginBottom: 15,
   },
-  picker: {
-    height: 44,
-    width: '100%',
-  },
-  datePickerContainer: {
+  datePickerBox: {
     marginHorizontal: 20,
     marginBottom: 25,
   },
@@ -275,13 +264,27 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
   },
-  listContainer: {
+  clearDateButton: {
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    backgroundColor: '#ff6b6b',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  clearDateText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  list: {
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
   card: {
     backgroundColor: '#fff',
     padding: 18,
+    paddingTop: 25,
     marginBottom: 15,
     borderRadius: 14,
     shadowColor: '#000',
