@@ -12,9 +12,9 @@ const ProfileScreen = () => {
     .reduce((sum, item) => sum + item.hours, 0);
 
   return (
-    <ScrollView style={{ flex: 1, padding: 20, backgroundColor: '#fff'  }}>
+    <ScrollView style={{ flex: 1, padding: 50, backgroundColor: '#fff'  }}>
     
-      <View style={{ borderWidth: 1, borderRadius: 10, padding: 16, backgroundColor: '#f9f9f9' }}>
+      <View style={{ borderWidth: 1, borderRadius: 10, padding: 26, backgroundColor: '#f9f9f9' }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Profile</Text>
           <TouchableOpacity>
