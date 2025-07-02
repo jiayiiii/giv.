@@ -87,12 +87,6 @@ export default function HomeScreen({ navigation }) {
       });
     }
 
-    // Strict filter for parents approval yes/no
-    filtered = filtered.filter(op => {
-      const approval = (op["Parents approval required?"] || '').toLowerCase();
-      return approval === parentApprovalFilter.toLowerCase();
-    });
-
     if (selectedDate) {
       const filterDateStr = formatDate(selectedDate);
       filtered = filtered.filter(op => op.date === filterDateStr);
@@ -122,7 +116,7 @@ export default function HomeScreen({ navigation }) {
               styles.filterButton,
               selectedBoardFilter === filter && styles.filterButtonSelected,
             ]}
-            onPress={() => setSelectedBoardFilter(filter)}
+            onPress={() => setSelectedBoardFilter(selectedBoardFilter === filter ? 'Everyone' : filter)}
           >
             <Text
               style={[
@@ -145,7 +139,7 @@ export default function HomeScreen({ navigation }) {
               styles.filterButton,
               selectedCategoryFilter === filter && styles.filterButtonSelected,
             ]}
-            onPress={() => setSelectedCategoryFilter(filter)}
+            onPress={() => setSelectedCategoryFilter(selectedCategoryFilter === filter ? 'All' : filter)}
           >
             <Text
               style={[
@@ -158,21 +152,6 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
-      <View style={styles.pickerContainer}>
-        <Text style={styles.label}>Parents Approval Required?</Text>
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={parentApprovalFilter}
-            onValueChange={setParentApprovalFilter}
-            style={styles.picker}
-            dropdownIconColor="#847ed6"
-          >
-            <Picker.Item label="Yes" value="Yes" />
-            <Picker.Item label="No" value="No" />
-          </Picker>
-        </View>
-      </View>
 
       <View style={styles.datePickerContainer}>
         <Text style={styles.label}>Filter by Date</Text>
@@ -209,7 +188,6 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.info}>Date: {item.date}</Text>
               <Text style={styles.info}>Time: {item.time}</Text>
               <Text style={styles.info}>Category: {item.Category}</Text>
-              <Text style={styles.info}>Parents Approval: {item["Parents approval required?"]}</Text>
               <Text style={styles.info}>Board/Filters: {item.Filters || item.Category || 'N/A'}</Text>
             </TouchableOpacity>
           ))
@@ -229,6 +207,7 @@ const styles = StyleSheet.create({
     color: '#3a3a3a',
     marginVertical: 20,
     paddingHorizontal: 20,
+    paddingTop: 50,
   },
   sectionLabel: {
     fontSize: 16,
