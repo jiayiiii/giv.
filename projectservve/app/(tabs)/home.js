@@ -5,9 +5,7 @@ import {
   Text,
   StyleSheet,
   View,
-  Platform,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function HomeScreen({ navigation }) {
   const [opportunities, setOpportunities] = useState([]);
@@ -149,7 +147,6 @@ export default function HomeScreen({ navigation }) {
 
           <View style={styles.datePickerBox}>
             <Text style={styles.sectionLabel}>Filter by Date</Text>
-
             <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.datePickerButton}>
               <Text style={{ fontSize: 16, color: selectedDates.length > 0 ? '#333' : '#aaa' }}>
                 {selectedDates.length > 0
@@ -163,7 +160,6 @@ export default function HomeScreen({ navigation }) {
                 <Text style={styles.clearDateText}>Clear Dates</Text>
               </TouchableOpacity>
             )}
-
             {showDatePicker && (
               <DateTimePicker
                 value={new Date()}
