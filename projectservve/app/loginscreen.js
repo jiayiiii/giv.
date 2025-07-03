@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
-import {View,Text,TextInput,TouchableOpacity,StyleSheet,Alert,KeyboardAvoidingView,Platform} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useContext } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform, 
+} from 'react-native';
+import { UserContext } from './UserContext';
 
-export default function LoginScreen({ setUser }) {
-  const navigation = useNavigation();
+export default function LoginScreen() {
+  const { setUser } = useContext(UserContext);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Missing Info', 'Please enter email and password.');
+      Alert.alert('Missing info', 'Please enter email and password');
       return;
     }
 
@@ -18,21 +27,20 @@ export default function LoginScreen({ setUser }) {
       const res = await fetch('https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c');
       const data = await res.json();
 
-      const matchedUser = data.find(user =>
-        user.email?.toLowerCase() === email.toLowerCase() &&
-        user.password === password
+      const matchedUser = data.find(
+        (user) =>
+          user.email?.toLowerCase() === email.toLowerCase() &&
+          user.password === password
       );
 
       if (matchedUser) {
-        Alert.alert('Welcome!', `Logged in as ${matchedUser.name}`);
-        setUser(matchedUser); 
-        navigation.navigate('home');
+        setUser(matchedUser);
       } else {
-        Alert.alert('Invalid Credentials', 'Email or password is incorrect.');
+        Alert.alert('Login Failed', 'Invalid email or password');
       }
-    } catch (err) {
-      console.error(err);
-      Alert.alert('Error', 'Failed to fetch. Try again later.');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to login. Try again later.');
+      console.error(error);
     }
   };
 
@@ -47,10 +55,12 @@ export default function LoginScreen({ setUser }) {
         <TextInput
           style={styles.input}
           placeholder="Email"
+          autoCapitalize="none"
           keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
         />
+
         <TextInput
           style={styles.input}
           placeholder="Password"
@@ -60,7 +70,7 @@ export default function LoginScreen({ setUser }) {
         />
 
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
+          <Text style={styles.buttonText}>Log In</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -69,24 +79,24 @@ export default function LoginScreen({ setUser }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  inner: { padding: 20, paddingTop: 100 },
-  title: { fontSize: 28, fontWeight: '700', marginBottom: 30 },
+  inner: { flex: 1, justifyContent: 'center', padding: 20 },
+  title: { fontSize: 30, fontWeight: 'bold', marginBottom: 40, textAlign: 'center' },
   input: {
     backgroundColor: '#f0f0f8',
     padding: 14,
     borderRadius: 10,
-    marginBottom: 15,
+    marginBottom: 20,
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#847ed6',
-    paddingVertical: 14,
+    backgroundColor: '#4a47a3',
+    padding: 15,
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 10,
-    shadowColor: '#847ed6',
+    shadowColor: '#4a47a3',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
   },
   buttonText: { color: '#fff', fontSize: 18, fontWeight: '600' },

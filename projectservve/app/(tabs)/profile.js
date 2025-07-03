@@ -1,90 +1,151 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Button, FlatList } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { UserContext } from '../UserContext';
 
-const ProfileScreen = () => {
-  const volunteerData = [
-    { date: '28 April 2025', volunteer: 'Relay For Life', status: 'ACCEPTED', hours: 5 },
-    { date: '5 April 2025', volunteer: 'Youth.sg', status: 'PENDING', hours: 10 },
-  ];
+export default function ProfileScreen() {
+  const { user, setUser } = useContext(UserContext);
 
-  const totalHours = volunteerData
-    .filter(item => item.status === 'ACCEPTED')
-    .reduce((sum, item) => sum + item.hours, 0);
+  const [profile, setProfile] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+
+  useEffect(() => {
+    if (!user?.email) return;
+
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch(
+          `https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c?email=${encodeURIComponent(
+            user.email
+          )}`
+        );
+        const data = await res.json();
+        setProfile(data[0] || null);
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    const fetchEvents = async () => {
+      try {
+        const res = await fetch(
+          `https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c?email=${encodeURIComponent(user.email)}`
+        );
+        const data = await res.json();
+        setEvents(data || []);
+      } catch (err) {
+        console.error('Failed to fetch events:', err);
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+
+    fetchProfile();
+    fetchEvents();
+  }, [user]);
+
+  const totalHours = events.reduce(
+    (sum, item) => sum + parseFloat(item.hours || 0),
+    0
+  );
+
+  const handleLogout = () => {
+    setUser(null);
+  };
 
   return (
-    <ScrollView style={{ flex: 1, padding: 20, paddingVertical: 70, backgroundColor: '#fff'  }}>
-    
-      <View style={{ borderWidth: 1, borderRadius: 10, padding: 26, backgroundColor: '#f9f9f9' }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Profile</Text>
-          <TouchableOpacity>
-            <Text style={{ color: 'orange', fontWeight: 'bold' }}>Edit</Text>
-          </TouchableOpacity>
+    <ScrollView style={styles.container}>
+      <Text style={styles.header}>👤 Profile</Text>
+
+      {loadingProfile ? (
+        <ActivityIndicator size="large" color="#aaa" />
+      ) : profile ? (
+        <View style={styles.card}>
+          <Text>Name: {profile.name}</Text>
+          <Text>Email: {profile.email}</Text>
+          <Text>Contact: {profile.contact}</Text>
+          <Text>Class: {profile.class}</Text>
+          <Text>Role: {profile.role}</Text>
         </View>
-        <Text>Name: John Pork</Text>
-        <Text>Age: 13</Text>
-        <Text>Email: john_pork@s2030.ssts.edu.sg</Text>
-        <Text>Contact number: +65 1234 5678</Text>
+      ) : (
+        <Text>No profile data found.</Text>
+      )}
 
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>📅 Events Attended</Text>
 
-        <Text style={{ marginTop: 10 }}>Skills:</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 5 }}>
-          {['Arts', 'Sports', 'Technology'].map(skill => (
-            <TouchableOpacity
-              key={skill}
-              style={{
-                borderWidth: 1,
-                borderRadius: 6,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-              }}>
-              <Text>{skill}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      <View style={{ marginTop: 20 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text style={{ fontSize: 18 }}>Data:</Text>
-          <TouchableOpacity>
-            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>＋</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{ marginTop: 10 }}>
-      
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 }}>
-            <Text style={{ flex: 2, fontWeight: 'bold' }}>Date</Text>
-            <Text style={{ flex: 2, fontWeight: 'bold' }}>Volunteer</Text>
-            <Text style={{ flex: 1, fontWeight: 'bold' }}>Accepted?</Text>
-            <Text style={{ flex: 1, fontWeight: 'bold' }}>Hours</Text>
-          </View>
-
-          {volunteerData.map((item, index) => (
-            <View key={index} style={{ flexDirection: 'row', paddingVertical: 6 }}>
-              <Text style={{ flex: 2 }}>{item.date}</Text>
-              <Text style={{ flex: 2 }}>{item.volunteer}</Text>
-              <Text style={{ flex: 1 }}>[{item.status}]</Text>
-              <Text style={{ flex: 1 }}>{item.hours}</Text>
+        {loadingEvents ? (
+          <ActivityIndicator size="large" color="#aaa" />
+        ) : events.length === 0 ? (
+          <Text>No events found for this account.</Text>
+        ) : (
+          <>
+            <View style={styles.eventHeader}>
+              <Text style={styles.eventCol}>Date</Text>
+              <Text style={styles.eventCol}>Event</Text>
+              <Text style={styles.eventCol}>Hours</Text>
             </View>
-          ))}
-        </View>
 
-        <Text style={{ marginTop: 10 }}>
-          Total: {totalHours} hours
-        </Text>
-        <Text style={{ marginTop: 2 }}>
-          Requirements for NYAA and LEAPS:
-        </Text>
-        <Text>nyaa - bronze : 24 hours</Text>
+            {events.map((event, index) => (
+              <View key={index} style={styles.eventRow}>
+                <Text style={styles.eventCol}>{event.date}</Text>
+                <Text style={styles.eventCol}>{event.event_name}</Text>
+                <Text style={styles.eventCol}>{event.hours}</Text>
+              </View>
+            ))}
+
+            <Text style={styles.totalText}>Total: {totalHours} hours</Text>
+          </>
+        )}
       </View>
 
-      <TouchableOpacity style={{ marginTop: 30, alignSelf: 'flex-end' }}>
+      <TouchableOpacity
+        style={{ marginTop: 30, alignSelf: 'flex-end' }}
+        onPress={handleLogout}
+      >
         <Text style={{ color: 'orange', fontWeight: 'bold' }}>Log out</Text>
       </TouchableOpacity>
     </ScrollView>
   );
-};
+}
 
-export default ProfileScreen;
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20, paddingTop: 70, backgroundColor: '#fff' },
+  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
+  card: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 20,
+    backgroundColor: '#f0f0f0',
+  },
+  section: { marginTop: 30 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  eventHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 5,
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+    marginBottom: 8,
+  },
+  eventRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+    borderBottomWidth: 0.5,
+    borderColor: '#ddd',
+  },
+  eventCol: { flex: 1, textAlign: 'center' },
+  totalText: { marginTop: 15, fontWeight: 'bold', fontSize: 16 },
+});

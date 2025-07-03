@@ -1,6 +1,6 @@
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-const opportunities = [
+const announcer = [
   {
     email: "contact@beachcleanup.org",
     name: "Beach Cleanup!!!",
@@ -25,7 +25,7 @@ const opportunities = [
     Filters: ["Everyone"],
     category: "Community",
   },
-]
+];
 
 export default function Index() {
   return (
@@ -33,16 +33,18 @@ export default function Index() {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.header}>Hi, user!</Text>
         <Text style={styles.subheader}>Volunteering Opportunities</Text>
-          {opportunities.map((opportunity, idx) => (
-            <View key={idx} style={styles.card}>
-              <Text style={styles.name}>{opportunity.name}</Text>
-              <Text style={styles.info}>Date: {opportunity.date}</Text>
-              <Text style={styles.info}>Time: {opportunity.time}</Text>
-              <Text style={styles.info}>Duration: {opportunity.duration.hours} hour{opportunity.duration.hours !== 1 ? "s" : ""} {opportunity.duration.minutes} minutes</Text>
-        </View>
-            ))}
-            </ScrollView>
-            </SafeAreaView>
+        {announcer.map((opportunity, idx) => (
+          <View key={idx} style={styles.card}>
+            <Text style={styles.name}>{opportunity.name}</Text>
+            <Text style={styles.info}>Date: {opportunity.date}</Text>
+            <Text style={styles.info}>Time: {opportunity.time}</Text>
+            <Text style={styles.info}>
+              Duration: {opportunity.duration.hours} hour{opportunity.duration.hours !== 1 ? "s" : ""} {opportunity.duration.minutes} minutes
+            </Text>
+          </View>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
