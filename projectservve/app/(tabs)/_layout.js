@@ -18,9 +18,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="opportunities"
+        name="announcer"
         options={{
-          title: 'Opportunities',
+          title: 'announcer',
           tabBarIcon: ({ color }) => <Octicons size={28} name="heart" color={color} />,
         }}
       />
