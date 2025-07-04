@@ -1,21 +1,32 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 
 export default function Details() {
-  const { opportunity } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+
+  // If you passed opportunity as a stringified object, parse it
+  let opportunity = {};
+  try {
+    opportunity = params.opportunity
+      ? JSON.parse(params.opportunity)
+      : {};
+  } catch (e) {
+    opportunity = {};
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{opportunity["Name of your volunteering opportunity"]}</Text>
-      <Text>Email: {opportunity["Email to contact for more details"]}</Text>
-      <Text>Date: {opportunity.date}</Text>
-      <Text>Time: {opportunity.time}</Text>
-      <Text>Description: {opportunity.Description}</Text>
-      <Text>Category: {opportunity.Category}</Text>
-      <Text>Limit: {opportunity["Limit of People (put only integers with no spaces)"]}</Text>
-      <Text>Duration: {opportunity.duration_hours} hour(s)</Text>
-      <Text>Parent Approval: {opportunity["Parents approval required?"]}</Text>
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>{opportunity["Name of your volunteering opportunity"] || "No Title"}</Text>
+      <Text>Email: {opportunity["Email to contact for more details"] || "N/A"}</Text>
+      <Text>Date: {opportunity.date || "N/A"}</Text>
+      <Text>Time: {opportunity.time || "N/A"}</Text>
+      <Text>Description: {opportunity.Description || "N/A"}</Text>
+      <Text>Category: {opportunity.Category || "N/A"}</Text>
+      <Text>Limit: {opportunity["Limit of People (put only integers with no spaces)"] || "N/A"}</Text>
+      <Text>Duration: {opportunity.duration_hours ? `${opportunity.duration_hours} hour(s)` : "N/A"}</Text>
+      <Text>Parent Approval: {opportunity["Parents approval required?"] || "N/A"}</Text>
+    </ScrollView>
   );
 }
 

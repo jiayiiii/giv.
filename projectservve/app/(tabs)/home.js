@@ -276,7 +276,10 @@ export default function HomeScreen() {
             <TouchableOpacity
               key={idx}
               style={styles.card}
-              onPress={() => navigation.navigate('Details', { opportunity: item })}
+              onPress={() => {
+                const { parsedTimestamp, ...serializableItem } = item;
+                navigation.navigate('Details', { opportunity: JSON.stringify(serializableItem) });
+              }}
               activeOpacity={0.8}
             >
               <Text style={styles.name}>{item["Name of your volunteering opportunity"]}</Text>
