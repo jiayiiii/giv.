@@ -1,3 +1,8 @@
+export const options = {
+  headerBackTitleVisible: false,
+  headerTitle: 'Details', 
+};
+
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -5,7 +10,9 @@ import { useLocalSearchParams } from 'expo-router';
 export default function Details() {
   const params = useLocalSearchParams();
 
-  // If you passed opportunity as a stringified object, parse it
+  
+
+  
   let opportunity = {};
   try {
     opportunity = params.opportunity
