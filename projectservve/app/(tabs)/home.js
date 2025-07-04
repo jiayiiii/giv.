@@ -13,6 +13,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function HomeScreen() {
+  const [bookmarked, setBookmarked] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +41,17 @@ export default function HomeScreen() {
     'Environmental',
     'Community Service',
   ];
+
+  const toggleBookmark = (item) => {
+  setBookmarked(prev => {
+    const name = item["Name of your volunteering opportunity"];
+    if (prev.includes(name)) {
+      return prev.filter(n => n !== name);
+    } else {
+      return [...prev, name];
+    }
+  });
+};
 
   const [selectedBoardFilter, setSelectedBoardFilter] = useState(null);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState(null);
@@ -282,6 +294,18 @@ export default function HomeScreen() {
               }}
               activeOpacity={0.8}
             >
+
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation(); // Prevent triggering card press
+                  toggleBookmark(item);
+                }}
+                style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }}
+              >
+                <Text style={{ fontSize: 22 }}>
+                  {bookmarked.includes(item["Name of your volunteering opportunity"]) ? '★' : '☆'}
+                </Text>
+              </TouchableOpacity>
               <Text style={styles.name}>{item["Name of your volunteering opportunity"]}</Text>
               <Text style={styles.info}>Date: {item.date || 'N/A'}</Text>
               <Text style={styles.info}>Time: {item.time || 'N/A'}</Text>
