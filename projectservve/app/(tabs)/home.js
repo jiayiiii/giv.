@@ -1,3 +1,4 @@
+import { useNavigation } from 'expo-router';
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   ScrollView,
@@ -11,11 +12,12 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen() {
   const [opportunities, setOpportunities] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation();
 
   const boardFilters = [
     'Student Council',
@@ -307,9 +309,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#3a3a3a',
     flex: 1,
+    paddingVertical: 10,
+
   },
   sipContainer: {
     alignItems: 'center',
+    paddingVertical: 10,
   },
   sipButton: {
     backgroundColor: '#3b82f6', // nice blue
@@ -335,6 +340,7 @@ const styles = StyleSheet.create({
   },
   filterButton: {
     paddingVertical: 10,
+    marginBottom: 10,
     paddingHorizontal: 18,
     backgroundColor: '#e0e0f7',
     borderRadius: 25,

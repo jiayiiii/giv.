@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function DetailsScreen({ route }) {
-  const { opportunity } = route.params;
+export default function Details() {
+  const { opportunity } = useLocalSearchParams();
 
   return (
     <View style={styles.container}>
