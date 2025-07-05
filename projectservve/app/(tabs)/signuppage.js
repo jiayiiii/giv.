@@ -23,24 +23,43 @@ export default function SignUpScreen() {
     class: '',
     contact: '',
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async () => {
-    const url = 'https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c';
+    const trimmedForm = {
+      name: form.name.trim(),
+      email: form.email.trim().toLowerCase(),
+      Password: form.password.trim(), // Note capital P here to match Google Sheet header
+      role: form.role.trim(),
+      class: form.class.trim(),
+      contact: form.contact.trim(),
+    };
 
-    if (!form.name || !form.email || !form.password) {
+    if (!trimmedForm.name || !trimmedForm.email || !trimmedForm.Password) {
       Alert.alert('Missing Info', 'Name, Email, and Password are required.');
       return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedForm.email)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    setLoading(true);
+    const url = 'https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c';
+
+    console.log('Sending data:', trimmedForm); // Debug log
 
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(trimmedForm),
       });
 
       if (res.ok) {
@@ -53,6 +72,8 @@ export default function SignUpScreen() {
     } catch (err) {
       console.error(err);
       Alert.alert('Network Error', 'Check your internet connection.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -75,6 +96,7 @@ export default function SignUpScreen() {
           style={styles.input}
           placeholder="Email"
           keyboardType="email-address"
+          autoCapitalize="none"
           value={form.email}
           onChangeText={text => handleChange('email', text)}
         />
@@ -109,8 +131,12 @@ export default function SignUpScreen() {
           onChangeText={text => handleChange('contact', text)}
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Submit</Text>
+        <TouchableOpacity
+          style={[styles.button, loading && { opacity: 0.7 }]}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>{loading ? 'Submitting...' : 'Submit'}</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

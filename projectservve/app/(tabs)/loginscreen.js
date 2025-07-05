@@ -7,40 +7,51 @@ import {
   Alert,
   StyleSheet,
   KeyboardAvoidingView,
-  Platform, 
+  Platform,
 } from 'react-native';
-import { UserContext } from './UserContext';
+import { UserContext } from '../UserContext';
 
 export default function LoginScreen() {
   const { setUser } = useContext(UserContext);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Missing info', 'Please enter email and password');
+      Alert.alert('Missing Info', 'Please enter email and password');
       return;
     }
 
+    setLoading(true);
+
     try {
-      const res = await fetch('https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c');
+      const res = await fetch(
+        'https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c'
+      );
       const data = await res.json();
+
+      console.log('Sheet Data:', JSON.stringify(data, null, 2));
+      console.log('Input:', email.trim(), password.trim());
 
       const matchedUser = data.find(
         (user) =>
-          user.email?.toLowerCase() === email.toLowerCase() &&
-          user.password === password
+          user.email?.toLowerCase().trim() === email.toLowerCase().trim() &&
+          user.Password?.trim() === password.trim()
       );
 
       if (matchedUser) {
         setUser(matchedUser);
+        Alert.alert('Success', `Welcome, ${matchedUser.name || 'user'}!`);
       } else {
         Alert.alert('Login Failed', 'Invalid email or password');
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to login. Try again later.');
-      console.error(error);
+      console.error('Login error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,9 +80,13 @@ export default function LoginScreen() {
           onChangeText={setPassword}
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Log In</Text>
-        </TouchableOpacity>
+        {loading ? (
+          <Text style={styles.loadingText}>Logging in...</Text>
+        ) : (
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Log In</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </KeyboardAvoidingView>
   );
@@ -80,7 +95,13 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   inner: { flex: 1, justifyContent: 'center', padding: 20 },
-  title: { fontSize: 30, fontWeight: 'bold', marginBottom: 40, textAlign: 'center' },
+  title: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    marginBottom: 40,
+    textAlign: 'center',
+    color: '#333',
+  },
   input: {
     backgroundColor: '#f0f0f8',
     padding: 14,
@@ -100,4 +121,5 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   buttonText: { color: '#fff', fontSize: 18, fontWeight: '600' },
+  loadingText: { textAlign: 'center', color: '#4a47a3', marginTop: 10 },
 });
