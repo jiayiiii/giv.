@@ -31,8 +31,8 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.header}>Hi, user!</Text>
-        <Text style={styles.subheader}>Volunteering Opportunities</Text>
+        <Text style={styles.header}>Announcements</Text>
+        <Text style={styles.subheader}>Whats new?</Text>
         {announcer.map((opportunity, idx) => (
           <View key={idx} style={styles.card}>
             <Text style={styles.name}>{opportunity.name}</Text>
