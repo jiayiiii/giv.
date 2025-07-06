@@ -33,7 +33,7 @@ export default function SignUpScreen() {
     const trimmedForm = {
       name: form.name.trim(),
       email: form.email.trim().toLowerCase(),
-      Password: form.password.trim(), // Note capital P here to match Google Sheet header
+      Password: form.password.trim(),
       role: form.role.trim(),
       class: form.class.trim(),
       contact: form.contact.trim(),

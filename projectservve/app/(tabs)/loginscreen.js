@@ -1,15 +1,15 @@
-import React, { useState, useContext } from 'react';
+import { useContext, useState } from 'react';
 import {
-  View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from 'react-native';
-import { UserContext } from '../UserContext';
+import { UserContext } from '../../context/UserContext';
 
 export default function LoginScreen() {
   const { setUser } = useContext(UserContext);

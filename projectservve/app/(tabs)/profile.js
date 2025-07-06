@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { UserContext } from '../UserContext';
+import { UserContext } from '../../context/UserContext';
 
 export default function ProfileScreen() {
   const { user, setUser } = useContext(UserContext);
@@ -18,14 +18,15 @@ export default function ProfileScreen() {
   const [loadingEvents, setLoadingEvents] = useState(true);
 
   useEffect(() => {
-    if (!user?.email) return;
+    if (!user) {
+      setUser({ email: 'test@example.com' });
+      return;
+    }
 
     const fetchProfile = async () => {
       try {
         const res = await fetch(
-          `https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c?email=${encodeURIComponent(
-            user.email
-          )}`
+          `https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c?email=${encodeURIComponent(user.email)}`
         );
         const data = await res.json();
         setProfile(data[0] || null);
@@ -65,6 +66,11 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      {/* Greeting */}
+      {loadingProfile ? null : (
+        <Text style={styles.greeting}>Hi, {profile?.name || 'User'}!</Text>
+      )}
+
       <Text style={styles.header}>👤 Profile</Text>
 
       {loadingProfile ? (
@@ -99,12 +105,29 @@ export default function ProfileScreen() {
             {events.map((event, index) => (
               <View key={index} style={styles.eventRow}>
                 <Text style={styles.eventCol}>{event.date}</Text>
-                <Text style={styles.eventCol}>{event.event_name}</Text>
-                <Text style={styles.eventCol}>{event.hours}</Text>
+                <Text style={styles.eventCol}>{event.event_name || 'No Name'}</Text>
+                <Text style={styles.eventCol}>
+                  {event.hours ? `${event.hours} hrs` : '0 hrs'}
+                </Text>
               </View>
             ))}
 
             <Text style={styles.totalText}>Total: {totalHours} hours</Text>
+
+            <View style={{ marginTop: 20 }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 5 }}>
+                📝 Summary of Events
+              </Text>
+              {events.map((event, index) => (
+                <Text key={index} style={{ marginBottom: 4 }}>
+                  • {event.event_name || 'Unnamed Event'} — {event.hours || '0'} hrs
+                </Text>
+              ))}
+
+              <Text style={{ marginTop: 10, fontSize: 16 }}>
+                ✅ You attended {events.length} events totaling {totalHours} hours.
+              </Text>
+            </View>
           </>
         )}
       </View>
@@ -121,6 +144,12 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, paddingTop: 70, backgroundColor: '#fff' },
+  greeting: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginBottom: 10,
+    color: '#333',
+  },
   header: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
   card: {
     borderWidth: 1,
