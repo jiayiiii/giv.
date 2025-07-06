@@ -19,16 +19,19 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     if (!user) {
-      setUser({ email: 'test@example.com' });
+      setUser({ email: 'john@email.com' });
       return;
     }
 
     const fetchProfile = async () => {
       try {
         const res = await fetch(
-          `https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c?email=${encodeURIComponent(user.email)}`
+          `https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c?email=${encodeURIComponent(
+            user.email
+          )}`
         );
         const data = await res.json();
+        console.log('Fetched profile:', data);
         setProfile(data[0] || null);
       } catch (err) {
         console.error('Failed to fetch profile:', err);
@@ -39,8 +42,10 @@ export default function ProfileScreen() {
 
     const fetchEvents = async () => {
       try {
-        const res = await fetch(
-          `https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c?email=${encodeURIComponent(user.email)}`
+        const res = await fetch( 
+          `https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c?email=${encodeURIComponent(
+            user.email
+          )}`
         );
         const data = await res.json();
         setEvents(data || []);
@@ -66,12 +71,9 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Greeting */}
-      {loadingProfile ? null : (
-        <Text style={styles.greeting}>Hi, {profile?.name || 'User'}!</Text>
-      )}
-
-      <Text style={styles.header}>👤 Profile</Text>
+      <Text style={styles.header}>
+        👋 Hi{profile?.name ? `, ${profile.name}` : ''}!
+      </Text>
 
       {loadingProfile ? (
         <ActivityIndicator size="large" color="#aaa" />
@@ -144,12 +146,6 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, paddingTop: 70, backgroundColor: '#fff' },
-  greeting: {
-    fontSize: 22,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#333',
-  },
   header: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
   card: {
     borderWidth: 1,

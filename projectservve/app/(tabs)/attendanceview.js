@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -7,13 +7,19 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import { UserContext } from '../../context/UserContext'; // adjust path if needed
 
 export default function AttendanceScreen() {
+  const { user } = useContext(UserContext);
   const [code, setCode] = useState('');
-  const [totalHours, setTotalHours] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const handleCheckIn = async () => {
+    if (!user?.email) {
+      Alert.alert('Not logged in', 'Please log in before checking in.');
+      return;
+    }
+
     if (code.length !== 6) {
       Alert.alert('Invalid Code', 'Code must be exactly 6 digits.');
       return;
@@ -21,26 +27,43 @@ export default function AttendanceScreen() {
 
     setLoading(true);
     try {
-      const response = await fetch(
-        'https://api.sheetbest.com/sheets/9ccf6dab-2ca4-4225-913d-aee1735da00a'
-      );
-      const data = await response.json();
+      const codeRes = await fetch('https://api.sheetbest.com/sheets/9ccf6dab-2ca4-4225-913d-aee1735da00a');
+      const codeData = await codeRes.json();
+      const matched = codeData.find(item => item.attendance_code === code);
 
-      const matchedEntry = data.find(
-        item => item.attendance_code === code
-      );
-
-      if (matchedEntry) {
-        const hours = parseFloat(matchedEntry.duration_hours);
-        setTotalHours(prev => prev + hours);
-        Alert.alert('✅ Success', `You earned ${hours} volunteer hours!`);
-        setCode('');
-      } else {
+      if (!matched) {
         Alert.alert('❌ Invalid Code', 'This code was not found.');
+        return;
       }
+
+      const earnedHours = parseFloat(matched.duration_hours || 0);
+
+      const attendanceEntry = {
+        email: user.email,
+        date: matched.date,
+        event_name: matched.event_name,
+        hours: matched.duration_hours,
+      };
+
+      await fetch('https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(attendanceEntry),
+      });
+
+      const eventRes = await fetch(`https://api.sheetbest.com/sheets/5a227262-33c1-47fa-a91e-da4b0fae953c?email=${encodeURIComponent(user.email)}`);
+      const userEvents = await eventRes.json();
+      const totalHours = userEvents.reduce((sum, item) => sum + parseFloat(item.hours || 0), 0);
+
+      Alert.alert(
+        '✅ Success',
+        `You earned ${earnedHours} volunteer hours for "${matched.event_name}".\nTotal hours: ${totalHours}`
+      );
+
+      setCode('');
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to connect to the attendance system.');
+      Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -66,7 +89,6 @@ export default function AttendanceScreen() {
           {loading ? 'Checking...' : 'Submit Code'}
         </Text>
       </TouchableOpacity>
-      <Text style={styles.hoursText}>Total Hours: {totalHours}</Text>
     </View>
   );
 }
@@ -105,8 +127,5 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  hoursText: {
-    fontSize: 18,
   },
 });
