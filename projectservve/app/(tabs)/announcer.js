@@ -1,61 +1,58 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-
-const announcer = [
-  {
-    email: "tom_tan@gmail.com",
-    name: "Talk about SIP",
-    date: "2025-06-18",
-    time: "14:00",
-    duration: { hours: 1, minutes: 30 },
-    description: "SIP is a studnet initaed prokect",
-    limit: 10,
-    parentApproval: false,
-    Filters: ["Everyone"],
-    category: "Community",
-  },
-  {
-    email: "sip_coordinator@school.edu",
-    name: "timetable",
-    date: "2025-07-05",
-    time: "14:00",
-    duration: { hours: 2, minutes: 0 },
-    description: "Learn how to plan your own timetable",
-    limit: 40,
-    parentApproval: false,
-    Filters: ["Secondary 3-5"],
-    category: "Education",
-  },
-  {
-    email: "student_council@school.edu",
-    name: "How to Launch Your Own Student-Initiated Learning",
-    date: "2025-07-12",
-    time: "16:00",
-    duration: { hours: 1, minutes: 30 },
-    description: "how to start ur own SIP porject?",
-    limit: 50,
-    parentApproval: false,
-    Filters: ["All Students"],
-    category: "Education",
-  },
-];
+import React, { useEffect, useState } from 'react';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
 
 export default function Index() {
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('https://api.sheetbest.com/sheets/0a5e867e-2e01-4211-a422-066db24730ad')
+      .then((response) => response.json())
+      .then((data) => {
+        setAnnouncements(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.header}>Announcements</Text>
         <Text style={styles.subheader}>What's new?</Text>
-        {announcer.map((opportunity, idx) => (
-          <View key={idx} style={styles.card}>
-            <Text style={styles.name}>{opportunity.name}</Text>
-            <Text style={styles.info}>Date: {opportunity.date}</Text>
-            <Text style={styles.info}>Time: {opportunity.time}</Text>
-            <Text style={styles.info}>
-              Duration: {opportunity.duration.hours} hour{opportunity.duration.hours !== 1 ? "s" : ""} {opportunity.duration.minutes} minutes
-            </Text>
-            <Text style={styles.description}>{opportunity.description}</Text>
-          </View>
-        ))}
+
+        {loading ? (
+          <ActivityIndicator size="large" color="#888" />
+        ) : (
+          announcements.map((item, idx) => (
+            <View key={idx} style={styles.card}>
+              <Text style={styles.name}>{item["Announcement name"] || "Untitled Event"}</Text>
+              <Text style={styles.info}>Date Shared: {item["Information, if its a sharing/presentation in the morning at school, pls state the date it was shared"] || "TBD"}</Text>
+              <Text style={styles.info}>Contact: {item.Contacts || "N/A"}</Text>
+              <Text style={styles.info}>Email: {item.Email || "N/A"}</Text>
+              <Text style={styles.description}>{item.Information || "No additional information."}</Text>
+
+              {item["Any images/infographic regarding this event?"]?.startsWith("http") && (
+                <Image
+                  source={{ uri: item["Any images/infographic regarding this event?"] }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -108,5 +105,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#555',
     marginTop: 8,
+    marginBottom: 8,
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    marginTop: 10,
   },
 });
