@@ -162,9 +162,9 @@ export default function HomeScreen() {
   }, [selectedBoardFilter, selectedCategoryFilter, selectedDates, opportunities]);
 
   const onSIPPress = () => {
-    console.log('SIP button pressed!');
-    //add navigations for SIP here
-  };
+  console.log('SIP button pressed!');
+  navigation.navigate('SIP');
+};
 
   if (loading && !refreshing) {
     return (
@@ -297,7 +297,7 @@ export default function HomeScreen() {
 
               <TouchableOpacity
                 onPress={(e) => {
-                  e.stopPropagation(); // Prevent triggering card press
+                  e.stopPropagation();
                   toggleBookmark(item);
                 }}
                 style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }}
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   sipButton: {
-    backgroundColor: '#3b82f6', // nice blue
+    backgroundColor: '#3b82f6',
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 20,

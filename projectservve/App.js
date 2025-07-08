@@ -10,6 +10,7 @@ import LoginScreen from './LoginScreen';
 import HomeScreen from './HomeScreen';
 import ProfileScreen from './ProfileScreen';
 import DetailsScreen from './DetailsScreen';
+import SIPScreen from './app/SIPScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -35,6 +36,11 @@ function AppStack() {
         name="Details"
         component={DetailsScreen}
         options={{ title: 'Opportunity Details' }}
+      />
+        <Stack.Screen
+        name="SIP"
+        component={SIPScreen}
+        options={{ title: 'SIP Infographic' }}
       />
     </Stack.Navigator>
   );
