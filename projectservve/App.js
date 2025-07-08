@@ -12,6 +12,8 @@ import ProfileScreen from './ProfileScreen';
 import DetailsScreen from './DetailsScreen';
 import SIPScreen from './app/SIPScreen';
 
+import { BookmarkProvider } from './BookmarkContext';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -37,7 +39,7 @@ function AppStack() {
         component={DetailsScreen}
         options={{ title: 'Opportunity Details' }}
       />
-        <Stack.Screen
+      <Stack.Screen
         name="SIP"
         component={SIPScreen}
         options={{ title: 'SIP Infographic' }}
@@ -69,7 +71,9 @@ function AppNavigator() {
 export default function App() {
   return (
     <UserProvider>
-      <AppNavigator />
+      <BookmarkProvider>
+        <AppNavigator />
+      </BookmarkProvider>
     </UserProvider>
   );
 }
