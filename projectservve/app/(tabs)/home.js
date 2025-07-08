@@ -1,4 +1,4 @@
-import { useNavigation } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   ScrollView,
@@ -59,7 +59,6 @@ export default function HomeScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Helper to parse the timestamp string into Date object
   function parseTimestamp(ts) {
     if (!ts) return null;
     const [datePart, timePart] = ts.split(' ');
@@ -69,7 +68,6 @@ export default function HomeScreen() {
     return new Date(year, month - 1, day, hour, minute, second);
   }
 
-  // Format date
   function formatDate(date) {
     if (!date) return '';
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
@@ -163,7 +161,7 @@ export default function HomeScreen() {
 
   const onSIPPress = () => {
   console.log('SIP button pressed!');
-  navigation.navigate('SIP');
+  navigation.getParent()?.navigate('SIP');
 };
 
   if (loading && !refreshing) {
