@@ -6,7 +6,13 @@ export default function Layout() {
     <UserProvider>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="SIPScreen" options={{ headerShown: false }} />
+        <Stack.Screen 
+          name="SIPScreen" 
+          options={{ 
+            headerShown: true,
+            title: "Student Initiated Project"
+          }} 
+        />
       </Stack>
     </UserProvider>
   );
