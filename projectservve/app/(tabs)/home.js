@@ -189,6 +189,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Volunteering Opportunities</Text>
         <View style={styles.sipContainer}>
+          //sip button
           <TouchableOpacity style={styles.sipButton} onPress={onSIPPress} activeOpacity={0.7}>
             <Text style={styles.sipButtonText}>SIP</Text>
           </TouchableOpacity>
