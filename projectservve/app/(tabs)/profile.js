@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { UserContext } from '../../context/UserContext';
+import { router } from 'expo-router';
 
 export default function ProfileScreen() {
   const { user, setUser } = useContext(UserContext);
@@ -13,10 +14,10 @@ export default function ProfileScreen() {
     console.log('Profile page - User data:', user);
     
     if (!user) {
-      setLoadingProfile(false);
-      setLoadingEvents(false);
+      router.replace('/loginscreen');
       return;
     }
+    
     setProfile(user);
     setLoadingProfile(false);
 
@@ -57,22 +58,17 @@ export default function ProfileScreen() {
     setUser(null);
   };
 
+  
+  if (!user) {
+    return null;
+  }
+
   return (
     <ScrollView style={styles.container}>
-      {!user && (
-        <View style={styles.notLoggedIn}>
-          <Text style={styles.header}>🔒 Not Logged In</Text>
-          <Text style={styles.notLoggedInText}>
-            Please log in to view your profile and events.
-          </Text>
-        </View>
-      )}
-      
-      {user && (
-        <View>
-          <Text style={styles.header}>
-            👋 Hi{profile && profile.name ? `, ${profile.name}` : ''}!
-          </Text>
+      <View>
+        <Text style={styles.header}>
+          👋 Hi{profile && profile.name ? `, ${profile.name}` : ''}!
+        </Text>
 
           {loadingProfile && <ActivityIndicator size="large" color="#aaa" />}
           
@@ -164,7 +160,6 @@ export default function ProfileScreen() {
             <Text style={styles.logoutText}>Log out</Text>
           </TouchableOpacity>
         </View>
-      )}
     </ScrollView>
   );
 }
@@ -199,18 +194,6 @@ const styles = StyleSheet.create({
   },
   eventCol: { flex: 1, textAlign: 'center' },
   totalText: { marginTop: 15, fontWeight: 'bold', fontSize: 16 },
-  notLoggedIn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingTop: 100,
-  },
-  notLoggedInText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 10,
-  },
   profileText: {
     fontSize: 16,
     marginBottom: 8,

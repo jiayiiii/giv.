@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 import { Alert, KeyboardAvoidingView,Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { UserContext } from '../../context/UserContext';
+import { UserContext } from '../context/UserContext';
+import { router } from 'expo-router';
 
 export default function LoginScreen() {
   const { setUser } = useContext(UserContext);
@@ -35,6 +36,7 @@ export default function LoginScreen() {
       if (matchedUser) {
         setUser(matchedUser);
         Alert.alert('Success', `Welcome, ${matchedUser.name || 'user'}!`);
+        router.replace('/(tabs)/profile');
       } else {
         Alert.alert('Login Failed', 'Invalid email or password');
       }
